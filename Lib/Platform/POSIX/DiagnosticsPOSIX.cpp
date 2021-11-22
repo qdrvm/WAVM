@@ -70,14 +70,14 @@ bool Platform::getInstructionSourceByAddress(Uptr ip, InstructionSource& outSour
 		}
 		else
 		{
-			char* demangledBuffer = nullptr; // will be allocated by __cxa_demangle
 			const char* demangledSymbolName = symbolInfo.dli_sname;
 			if(symbolInfo.dli_sname[0] == '_')
 			{
-				Uptr numDemangledChars = sizeof(demangledBuffer);
+				char* demangledBuffer = nullptr;
+				Uptr numDemangledChars = 0;
 				I32 demangleStatus = 0;
-				if(abi::__cxa_demangle(symbolInfo.dli_sname,
-									   demangledBuffer,
+				if(demangledBuffer = abi::__cxa_demangle(symbolInfo.dli_sname,
+									   nullptr,
 									   (size_t*)&numDemangledChars,
 									   &demangleStatus))
 				{ demangledSymbolName = demangledBuffer; }
