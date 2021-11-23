@@ -15,8 +15,8 @@ set(WAVM_VERSION_SUFFIX ${CMAKE_MATCH_4})
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/HunterGate.cmake)
 
 HunterGate(
-    URL  https://github.com/soramitsu/soramitsu-hunter/archive/9ca72322e8d9de70d360dc7f371b223d32999123.zip
-    SHA1 0345aa62a243871f2ddf201164dcf25c930da998
+    URL  https://github.com/soramitsu/soramitsu-hunter/archive/v0.23.257-soramitsu19.zip
+    SHA1 29a3c9287586ebf1dd92ca98f38d06b556413a1a
 )
 
 # Declare the CMake project
