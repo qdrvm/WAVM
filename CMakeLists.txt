@@ -293,6 +293,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 	wavm_add_c_cxx_flag_if_supported("-Wlogical-op")
 	wavm_add_cxx_flag_if_supported("-Wnon-virtual-dtor")
 	wavm_add_cxx_flag_if_supported("-Wno-unused-but-set-variable")
+	wavm_add_cxx_flag_if_supported("-Wno-null-dereference")
 	wavm_add_c_cxx_flag_if_supported("-Wrestrict")
 	wavm_add_c_cxx_flag_if_supported("-Wdouble-promotion")
 
