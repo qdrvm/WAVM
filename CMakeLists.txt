@@ -366,9 +366,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 			set(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}            -gsplit-dwarf")
 			set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG}          -gsplit-dwarf")
 
-			# If the linker supports it, use --gdb-index to add an index of external debug data to the
-			# binaries. gold and lld support this, ld does not.
-			wavm_add_linker_flag_if_supported("-Wl,--gdb-index")
+			if(NOT HUNTER_ENABLED)
+				# If the linker supports it, use --gdb-index to add an index of external debug data to the
+				# binaries. gold and lld support this, ld does not.
+				wavm_add_linker_flag_if_supported("-Wl,--gdb-index")
+			endif()
 		endif()
 	endif()
 endif()
