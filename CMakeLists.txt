@@ -366,9 +366,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 			set(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}            -gsplit-dwarf")
 			set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG}          -gsplit-dwarf")
 
-			# If the linker supports it, use --gdb-index to add an index of external debug data to the
-			# binaries. gold and lld support this, ld does not.
-			wavm_add_linker_flag_if_supported("-Wl,--gdb-index")
+			if(NOT HUNTER_ENABLED)
+				# If the linker supports it, use --gdb-index to add an index of external debug data to the
+				# binaries. gold and lld support this, ld does not.
+				wavm_add_linker_flag_if_supported("-Wl,--gdb-index")
+			endif()
 		endif()
 	endif()
 endif()
@@ -452,7 +454,7 @@ function(WAVM_SET_TARGET_COMPILE_OPTIONS TARGET_NAME)
 			   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/Include>
 	)
 
-	# Target C++11.
+	# Target C++14.
 	target_compile_features(${TARGET_NAME} PUBLIC cxx_std_14)
 
 	# Set sanitizer options.
