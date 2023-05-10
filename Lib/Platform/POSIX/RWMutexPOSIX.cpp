@@ -45,10 +45,10 @@ void Platform::RWMutex::unlock(LockShareability shareability)
 {
 	if(shareability == LockShareability::exclusive)
 	{
-		WAVM_ERROR_UNLESS(!pthread_rwlock_unlock((pthread_rwlock_t*)&lockData));
 #if WAVM_ENABLE_ASSERTS
 		exclusiveLockingThreadId.store(0, std::memory_order_relaxed);
 #endif
+		WAVM_ERROR_UNLESS(!pthread_rwlock_unlock((pthread_rwlock_t*)&lockData));
 	}
 	else
 	{
