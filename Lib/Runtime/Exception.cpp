@@ -119,17 +119,17 @@ std::vector<std::string> Runtime::describeCallStack(const Platform::CallStack& c
 	return frameDescriptions;
 }
 
-ExceptionType* Runtime::createExceptionType(Compartment* compartment,
+GCPointer<ExceptionType> Runtime::createExceptionType(Compartment* compartment,
 											IR::ExceptionType sig,
 											std::string&& debugName)
 {
-	auto exceptionType = new ExceptionType(compartment, sig, std::move(debugName));
+	GCPointer<ExceptionType> exceptionType(new ExceptionType(compartment, sig, std::move(debugName)));
 
 	Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
 	exceptionType->id = compartment->exceptionTypes.add(UINTPTR_MAX, exceptionType);
 	if(exceptionType->id == UINTPTR_MAX)
 	{
-		delete exceptionType;
+		deleteGCPointer(exceptionType);
 		return nullptr;
 	}
 

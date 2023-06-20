@@ -69,7 +69,7 @@ Instance::~Instance()
 	}
 }
 
-Instance* Runtime::instantiateModule(Compartment* compartment,
+GCPointer<Instance> Runtime::instantiateModule(Compartment* compartment,
 									 ModuleConstRefParam module,
 									 ImportBindings&& imports,
 									 std::string&& moduleDebugName,
@@ -146,7 +146,7 @@ Instance* Runtime::instantiateModule(Compartment* compartment,
 									 resourceQuota);
 }
 
-Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
+GCPointer<Instance> Runtime::instantiateModuleInternal(Compartment* compartment,
 											 ModuleConstRefParam module,
 											 std::vector<FunctionImportBinding>&& functionImports,
 											 std::vector<Table*>&& tables,
@@ -173,6 +173,13 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 	DisassemblyNames disassemblyNames;
 	getDisassemblyNames(module->ir, disassemblyNames);
 
+	struct {
+		std::vector<GCPointer<Table>> tables;
+		std::vector<GCPointer<Memory>> memories;
+		std::vector<GCPointer<Global>> globals;
+		std::vector<GCPointer<ExceptionType>> exceptionTypes;
+	} gcNew;
+
 	// Instantiate the module's memory and table definitions.
 	for(Uptr tableDefIndex = 0; tableDefIndex < module->ir.tables.defs.size(); ++tableDefIndex)
 	{
@@ -190,6 +197,7 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 			throwException(ExceptionTypes::outOfMemory);
 		}
 		tables.push_back(table);
+		gcNew.tables.push_back(table);
 	}
 	for(Uptr memoryDefIndex = 0; memoryDefIndex < module->ir.memories.defs.size(); ++memoryDefIndex)
 	{
@@ -206,6 +214,7 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 			throwException(ExceptionTypes::outOfMemory);
 		}
 		memories.push_back(memory);
+		gcNew.memories.push_back(memory);
 	}
 
 	// Instantiate the module's global definitions.
@@ -214,9 +223,10 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 		std::string debugName
 			= disassemblyNames.globals[module->ir.globals.imports.size() + globalDefIndex];
 		const GlobalDef& globalDef = module->ir.globals.defs[globalDefIndex];
-		Global* global
+		auto global
 			= createGlobal(compartment, globalDef.type, std::move(debugName), resourceQuota);
 		globals.push_back(global);
+		gcNew.globals.push_back(global);
 
 		// Defer evaluation of globals with (ref.func ...) initializers until the module's code is
 		// loaded and we have pointers to the Runtime::Function objects.
@@ -238,8 +248,10 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 		std::string debugName
 			= disassemblyNames
 				  .exceptionTypes[module->ir.exceptionTypes.imports.size() + exceptionTypeDefIndex];
-		exceptionTypes.push_back(
-			createExceptionType(compartment, exceptionTypeDef.type, std::move(debugName)));
+		auto exceptionType
+			= createExceptionType(compartment, exceptionTypeDef.type, std::move(debugName));
+		exceptionTypes.push_back(exceptionType);
+		gcNew.exceptionTypes.push_back(exceptionType);
 	}
 
 	// Set up the values to bind to the symbols in the LLVMJIT object code.
@@ -380,7 +392,7 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 	}
 
 	// Create the Instance and add it to the compartment's modules list.
-	Instance* instance = new Instance(compartment,
+	GCPointer<Instance> instance(new Instance(compartment,
 									  id,
 									  std::move(exportMap),
 									  std::move(exports),
@@ -394,7 +406,7 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
 									  std::move(elemSegments),
 									  std::move(jitModule),
 									  std::move(moduleDebugName),
-									  resourceQuota);
+									  resourceQuota));
 	{
 		Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
 		compartment->instances[id] = instance;
