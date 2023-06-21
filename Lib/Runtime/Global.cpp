@@ -15,7 +15,7 @@ using namespace WAVM;
 using namespace WAVM::IR;
 using namespace WAVM::Runtime;
 
-Global* Runtime::createGlobal(Compartment* compartment,
+GCPointer<Global> Runtime::createGlobal(Compartment* compartment,
 							  GlobalType type,
 							  std::string&& debugName,
 							  ResourceQuotaRefParam resourceQuota)
@@ -34,13 +34,13 @@ Global* Runtime::createGlobal(Compartment* compartment,
 	}
 
 	// Create the global and add it to the compartment's list of globals.
-	Global* global = new Global(compartment, type, mutableGlobalIndex, std::move(debugName));
+	GCPointer<Global> global(new Global(compartment, type, mutableGlobalIndex, std::move(debugName)));
 	{
 		Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
 		global->id = compartment->globals.add(UINTPTR_MAX, global);
 		if(global->id == UINTPTR_MAX)
 		{
-			delete global;
+			deleteGCPointer(global);
 			return nullptr;
 		}
 	}

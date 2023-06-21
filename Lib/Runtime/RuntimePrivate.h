@@ -21,6 +21,11 @@ namespace WAVM { namespace Intrinsics {
 }}
 
 namespace WAVM { namespace Runtime {
+	template<typename ObjectType> void deleteGCPointer(GCPointer<ObjectType> &gc) {
+		ObjectType* ptr = (ObjectType*)gc;
+		gc = nullptr;
+		delete ptr;
+	}
 
 	// A private base class for all runtime objects that are garbage collected.
 	struct GCObject : Object
@@ -383,7 +388,7 @@ namespace WAVM { namespace Runtime {
 		FunctionImportBinding(Function* inWASMFunction) : wasmFunction(inWASMFunction) {}
 		FunctionImportBinding(void* inNativeFunction) : nativeFunction(inNativeFunction) {}
 	};
-	Instance* instantiateModuleInternal(Compartment* compartment,
+	GCPointer<Instance> instantiateModuleInternal(Compartment* compartment,
 										ModuleConstRefParam module,
 										std::vector<FunctionImportBinding>&& functionImports,
 										std::vector<Table*>&& tableImports,

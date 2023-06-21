@@ -89,7 +89,7 @@ Intrinsics::Memory::Memory(Intrinsics::Module* moduleRef,
 	moduleRef->impl->memoryMap.set(name, this);
 }
 
-Instance* Intrinsics::instantiateModule(
+GCPointer<Instance> Intrinsics::instantiateModule(
 	Compartment* compartment,
 	const std::initializer_list<const Intrinsics::Module*>& moduleRefs,
 	std::string&& debugName)
@@ -225,7 +225,7 @@ Instance* Intrinsics::instantiateModule(
 	}
 
 	ModuleRef module = compileModule(irModule);
-	Instance* instance = instantiateModuleInternal(compartment,
+	GCPointer<Instance> instance = instantiateModuleInternal(compartment,
 												   module,
 												   std::move(functionImportBindings),
 												   {},

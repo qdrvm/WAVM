@@ -192,7 +192,7 @@ namespace WAVM { namespace Runtime {
 	};
 
 	// Creates an exception type instance.
-	WAVM_API ExceptionType* createExceptionType(Compartment* compartment,
+	WAVM_API GCPointer<ExceptionType> createExceptionType(Compartment* compartment,
 												IR::ExceptionType sig,
 												std::string&& debugName);
 
@@ -324,7 +324,7 @@ namespace WAVM { namespace Runtime {
 	//
 
 	// Creates a Table. May return null if the memory allocation fails.
-	WAVM_API Table* createTable(Compartment* compartment,
+	WAVM_API GCPointer<Table> createTable(Compartment* compartment,
 								IR::TableType type,
 								Object* element,
 								std::string&& debugName,
@@ -355,7 +355,7 @@ namespace WAVM { namespace Runtime {
 	//
 
 	// Creates a Memory. May return null if the memory allocation fails.
-	WAVM_API Memory* createMemory(Compartment* compartment,
+	WAVM_API GCPointer<Memory> createMemory(Compartment* compartment,
 								  IR::MemoryType type,
 								  std::string&& debugName,
 								  ResourceQuotaRefParam resourceQuota = ResourceQuotaRef());
@@ -402,7 +402,7 @@ namespace WAVM { namespace Runtime {
 	//
 
 	// Creates a Global with the specified type. The initial value is set to the appropriate zero.
-	WAVM_API Global* createGlobal(Compartment* compartment,
+	WAVM_API GCPointer<Global> createGlobal(Compartment* compartment,
 								  IR::GlobalType type,
 								  std::string&& debugName,
 								  ResourceQuotaRefParam resourceQuota = ResourceQuotaRef());
@@ -462,7 +462,7 @@ namespace WAVM { namespace Runtime {
 
 	// Instantiates a module, bindings its imports to the specified objects. May throw a runtime
 	// exception for bad segment offsets.
-	WAVM_API Instance* instantiateModule(Compartment* compartment,
+	WAVM_API GCPointer<Instance> instantiateModule(Compartment* compartment,
 										 ModuleConstRefParam module,
 										 ImportBindings&& imports,
 										 std::string&& debugName,
@@ -534,7 +534,7 @@ namespace WAVM { namespace Runtime {
 	// Contexts
 	//
 
-	WAVM_API Context* createContext(Compartment* compartment, std::string&& debugName = "");
+	WAVM_API GCPointer<Context> createContext(Compartment* compartment, std::string&& debugName = "");
 
 	WAVM_API struct ContextRuntimeData* getContextRuntimeData(const Context* context);
 	WAVM_API Context* getContextFromRuntimeData(struct ContextRuntimeData* contextRuntimeData);
@@ -544,7 +544,7 @@ namespace WAVM { namespace Runtime {
 	WAVM_API Compartment* getCompartment(const Context* context);
 
 	// Creates a new context, initializing its mutable global state from the given context.
-	WAVM_API Context* cloneContext(const Context* context, Compartment* newCompartment);
+	WAVM_API GCPointer<Context> cloneContext(const GCPointer<Context> &context, Compartment* newCompartment);
 
 	//
 	// Foreign objects

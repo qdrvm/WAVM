@@ -24,7 +24,7 @@ namespace WAVM { namespace Intrinsics {
 		WAVM_API ~Module();
 	};
 
-	WAVM_API Runtime::Instance* instantiateModule(
+	WAVM_API Runtime::GCPointer<Runtime::Instance> instantiateModule(
 		Runtime::Compartment* compartment,
 		const std::initializer_list<const Intrinsics::Module*>& moduleRefs,
 		std::string&& debugName);

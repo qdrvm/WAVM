@@ -164,14 +164,14 @@ static GrowResult growTableImpl(Table* table,
 	return GrowResult::success;
 }
 
-Table* Runtime::createTable(Compartment* compartment,
+GCPointer<Table> Runtime::createTable(Compartment* compartment,
 							IR::TableType type,
 							Object* element,
 							std::string&& debugName,
 							ResourceQuotaRefParam resourceQuota)
 {
 	WAVM_ASSERT(type.size.min <= UINTPTR_MAX);
-	Table* table = createTableImpl(compartment, type, std::move(debugName), resourceQuota);
+	GCPointer<Table> table(createTableImpl(compartment, type, std::move(debugName), resourceQuota));
 	if(!table) { return nullptr; }
 
 	// If element is null, use the uninitialized element sentinel instead.
@@ -184,7 +184,7 @@ Table* Runtime::createTable(Compartment* compartment,
 	// Grow the table to the type's minimum size.
 	if(growTableImpl(table, Uptr(type.size.min), nullptr, true, element) != GrowResult::success)
 	{
-		delete table;
+		deleteGCPointer(table);
 		return nullptr;
 	}
 
@@ -195,7 +195,7 @@ Table* Runtime::createTable(Compartment* compartment,
 		table->id = compartment->tables.add(UINTPTR_MAX, table);
 		if(table->id == UINTPTR_MAX)
 		{
-			delete table;
+			deleteGCPointer(table);
 			return nullptr;
 		}
 		compartment->runtimeData->tables[table->id].base = table->elements;

@@ -93,13 +93,13 @@ static Memory* createMemoryImpl(Compartment* compartment,
 	return memory;
 }
 
-Memory* Runtime::createMemory(Compartment* compartment,
+GCPointer<Memory> Runtime::createMemory(Compartment* compartment,
 							  IR::MemoryType type,
 							  std::string&& debugName,
 							  ResourceQuotaRefParam resourceQuota)
 {
 	WAVM_ASSERT(type.size.min <= UINTPTR_MAX);
-	Memory* memory = createMemoryImpl(compartment, type, std::move(debugName), resourceQuota);
+	GCPointer<Memory> memory(createMemoryImpl(compartment, type, std::move(debugName), resourceQuota));
 	if(!memory) { return nullptr; }
 
 	// Add the memory to the compartment's memories IndexMap.
@@ -109,7 +109,7 @@ Memory* Runtime::createMemory(Compartment* compartment,
 		memory->id = compartment->memories.add(UINTPTR_MAX, memory);
 		if(memory->id == UINTPTR_MAX)
 		{
-			delete memory;
+			deleteGCPointer(memory);
 			return nullptr;
 		}
 		MemoryRuntimeData& runtimeData = compartment->runtimeData->memories[memory->id];

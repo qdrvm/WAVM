@@ -12,10 +12,10 @@
 using namespace WAVM;
 using namespace WAVM::Runtime;
 
-Context* Runtime::createContext(Compartment* compartment, std::string&& debugName)
+GCPointer<Context> Runtime::createContext(Compartment* compartment, std::string&& debugName)
 {
 	WAVM_ASSERT(compartment);
-	Context* context = new Context(compartment, std::move(debugName));
+	GCPointer<Context> context(new Context(compartment, std::move(debugName)));
 	{
 		Platform::RWMutex::ExclusiveLock lock(compartment->mutex);
 
@@ -23,7 +23,7 @@ Context* Runtime::createContext(Compartment* compartment, std::string&& debugNam
 		context->id = compartment->contexts.add(UINTPTR_MAX, context);
 		if(context->id == UINTPTR_MAX)
 		{
-			delete context;
+			deleteGCPointer(context);
 			return nullptr;
 		}
 		context->runtimeData = &compartment->runtimeData->contexts[context->id];
@@ -33,7 +33,7 @@ Context* Runtime::createContext(Compartment* compartment, std::string&& debugNam
 			   (U8*)context->runtimeData,
 			   sizeof(ContextRuntimeData) >> Platform::getBytesPerPageLog2()))
 		{
-			delete context;
+			deleteGCPointer(context);
 			return nullptr;
 		}
 		Platform::registerVirtualAllocation(sizeof(ContextRuntimeData));
@@ -61,10 +61,10 @@ Runtime::Context::~Context()
 
 Compartment* Runtime::getCompartment(const Context* context) { return context->compartment; }
 
-Context* Runtime::cloneContext(const Context* context, Compartment* newCompartment)
+GCPointer<Context> Runtime::cloneContext(const GCPointer<Context> &context, Compartment* newCompartment)
 {
 	// Create a new context and initialize its runtime data with the values from the source context.
-	Context* clonedContext = createContext(newCompartment);
+	GCPointer<Context> clonedContext = createContext(newCompartment);
 	if(clonedContext)
 	{
 		memcpy(clonedContext->runtimeData->mutableGlobals,
