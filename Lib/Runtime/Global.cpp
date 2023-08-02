@@ -20,6 +20,7 @@ GCPointer<Global> Runtime::createGlobal(Compartment* compartment,
 							  std::string&& debugName,
 							  ResourceQuotaRefParam resourceQuota)
 {
+	Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
 	U32 mutableGlobalIndex = UINT32_MAX;
 	if(type.isMutable)
 	{
@@ -35,14 +36,11 @@ GCPointer<Global> Runtime::createGlobal(Compartment* compartment,
 
 	// Create the global and add it to the compartment's list of globals.
 	GCPointer<Global> global(new Global(compartment, type, mutableGlobalIndex, std::move(debugName)));
+	global->id = compartment->globals.add(UINTPTR_MAX, global);
+	if(global->id == UINTPTR_MAX)
 	{
-		Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
-		global->id = compartment->globals.add(UINTPTR_MAX, global);
-		if(global->id == UINTPTR_MAX)
-		{
-			deleteGCPointer(global);
-			return nullptr;
-		}
+		deleteGCPointer(global);
+		return nullptr;
 	}
 
 	return global;
