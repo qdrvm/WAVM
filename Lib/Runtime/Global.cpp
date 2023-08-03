@@ -59,6 +59,7 @@ void Runtime::initializeGlobal(Global* global, Value value)
 	global->initialValue = value;
 	if(global->type.isMutable)
 	{
+		Platform::RWMutex::ExclusiveLock compartmentLock(compartment->mutex);
 		// Initialize the global's mutable value for all current and future contexts.
 		compartment->initialContextMutableGlobals[global->mutableGlobalIndex] = value;
 		for(Context* context : compartment->contexts)
