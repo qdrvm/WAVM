@@ -48,7 +48,7 @@ static void maskSignals(int how)
 	pthread_sigmask(how, &set, nullptr);
 }
 
-[[noreturn]] static void signalHandler(int signalNumber, siginfo_t* signalInfo, void*)
+[[maybe_unused]][[noreturn]] static void signalHandler(int signalNumber, siginfo_t* signalInfo, void*)
 {
 	maskSignals(SIG_BLOCK);
 
