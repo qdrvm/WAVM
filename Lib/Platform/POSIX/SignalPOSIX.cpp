@@ -111,6 +111,7 @@ static void maskSignals(int how)
 
 bool Platform::initGlobalSignalsOnce()
 {
+	#ifndef WAVM_DISABLE_UNIX_SIGNALS
 	// Set the signal handler for the signals we want to intercept.
 	struct sigaction signalAction;
 	signalAction.sa_sigaction = signalHandler;
@@ -119,6 +120,7 @@ bool Platform::initGlobalSignalsOnce()
 	WAVM_ERROR_UNLESS(!sigaction(SIGSEGV, &signalAction, nullptr));
 	WAVM_ERROR_UNLESS(!sigaction(SIGBUS, &signalAction, nullptr));
 	WAVM_ERROR_UNLESS(!sigaction(SIGFPE, &signalAction, nullptr));
+	#endif
 
 	return true;
 }
