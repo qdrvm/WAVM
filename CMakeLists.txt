@@ -70,6 +70,11 @@ include(CPack)
 
 # WAVM configuration options
 
+option(WAVM_DISABLE_UNIX_SIGNALS "don't handle unix signals" OFF)
+if(WAVM_DISABLE_UNIX_SIGNALS)
+	add_compile_definitions(WAVM_DISABLE_UNIX_SIGNALS)
+endif()
+
 option(WAVM_ENABLE_STATIC_LINKING "use static linking instead of dynamic for the WAVM libraries" OFF)
 option(WAVM_ENABLE_RELEASE_ASSERTS "enable assertions in release builds" 0)
 set(WAVM_ENABLE_LTO "OFF" CACHE STRING "enable link-time optimization (off, on, or thin)")
