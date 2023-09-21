@@ -12,12 +12,7 @@ set(WAVM_VERSION_MINOR  ${CMAKE_MATCH_2})
 set(WAVM_VERSION_PATCH  ${CMAKE_MATCH_3})
 set(WAVM_VERSION_SUFFIX ${CMAKE_MATCH_4})
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/HunterGate.cmake)
-
-HunterGate(
-    URL  https://github.com/soramitsu/soramitsu-hunter/archive/v0.23.257-soramitsu19.zip
-    SHA1 29a3c9287586ebf1dd92ca98f38d06b556413a1a
-)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/init.cmake)
 
 # Declare the CMake project
 project(
@@ -117,9 +112,7 @@ endif()
 
 if(WAVM_ENABLE_RUNTIME)
 	hunter_add_package(LLVM)
-
-	# Find an installed build of LLVM
-	find_package(LLVM REQUIRED CONFIG)
+    find_package(LLVM CONFIG REQUIRED)
 
 	if(LLVM_VERSION_MAJOR LESS 6)
 		message(FATAL_ERROR "WAVM requires LLVM version 6.0 or newer")
@@ -521,6 +514,14 @@ function(WAVM_SET_TARGET_COMPILE_OPTIONS TARGET_NAME)
 		target_compile_options(${TARGET_NAME} PRIVATE "-pthread")
 		target_link_libraries(${TARGET_NAME} PRIVATE "-pthread")
 	endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-redundant-move")
+        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-dangling-reference")
+        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-error=extra")
+    else()
+        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-redundant-move")
+    endif()
 
 	# Add the optional flags that the compiler was detected to support.
 	# This needs to happen *AFTER* the above -Wall -Wextra to ensure that those flags don't

@@ -68,7 +68,9 @@ void EmitFunctionContext::loop(ControlStructureImm imm)
 
 	// Pop the initial values of the loop's parameters from the stack.
 	for(Iptr elementIndex = Iptr(blockType.params().size()) - 1; elementIndex >= 0; --elementIndex)
-	{ parameterPHIs[elementIndex]->addIncoming(coerceToCanonicalType(pop()), loopEntryBlock); }
+	{
+		parameterPHIs[elementIndex]->addIncoming(coerceToCanonicalType(pop()), loopEntryBlock);
+	}
 
 	// Branch to the loop body and switch the IR builder to emit there.
 	irBuilder.CreateBr(loopBodyBlock);
@@ -144,10 +146,7 @@ void EmitFunctionContext::end(NoImm)
 	ControlContext& currentContext = controlStack.back();
 
 	if(currentContext.type == ControlContext::Type::try_) { endTryWithoutCatch(); }
-	else if(currentContext.type == ControlContext::Type::catch_)
-	{
-		endTryCatch();
-	}
+	else if(currentContext.type == ControlContext::Type::catch_) { endTryCatch(); }
 
 	branchToEndOfControlContext();
 
@@ -181,7 +180,9 @@ void EmitFunctionContext::end(NoImm)
 		for(Uptr elementIndex = 0; elementIndex < currentContext.endPHIs.size(); ++elementIndex)
 		{
 			if(currentContext.endPHIs[elementIndex]->getNumIncomingValues())
-			{ push(currentContext.endPHIs[elementIndex]); }
+			{
+				push(currentContext.endPHIs[elementIndex]);
+			}
 			else
 			{
 				// If there weren't any incoming values for the end PHI, remove it and push
@@ -338,7 +339,9 @@ void EmitFunctionContext::call(FunctionImm imm)
 
 	// Coerce the arguments to their canonical type.
 	for(Uptr argIndex = 0; argIndex < numArguments; ++argIndex)
-	{ llvmArgs[argIndex] = coerceToCanonicalType(llvmArgs[argIndex]); }
+	{
+		llvmArgs[argIndex] = coerceToCanonicalType(llvmArgs[argIndex]);
+	}
 
 	// Call the function.
 	ValueVector results = emitCallOrInvoke(callee,
@@ -365,25 +368,32 @@ void EmitFunctionContext::call_indirect(CallIndirectImm imm)
 
 	// Coerce the arguments to their canonical type.
 	for(Uptr argIndex = 0; argIndex < numArguments; ++argIndex)
-	{ llvmArgs[argIndex] = coerceToCanonicalType(llvmArgs[argIndex]); }
+	{
+		llvmArgs[argIndex] = coerceToCanonicalType(llvmArgs[argIndex]);
+	}
 
 	// Zero extend the function index to the pointer size.
 	elementIndex = zext(elementIndex, moduleContext.iptrType);
 
 	// Load base and endIndex from the TableRuntimeData in CompartmentRuntimeData::tables
 	// corresponding to imm.tableIndex.
+	auto compartmentPointer = getCompartmentAddress();
 	auto tableRuntimeDataPointer = irBuilder.CreateInBoundsGEP(
-		getCompartmentAddress(), {moduleContext.tableOffsets[imm.tableIndex]});
+		compartmentPointer->getType()->getScalarType()->getPointerElementType(),
+		compartmentPointer,
+		moduleContext.tableOffsets[imm.tableIndex]);
 	auto tableBasePointer = loadFromUntypedPointer(
 		irBuilder.CreateInBoundsGEP(
+			tableRuntimeDataPointer->getType()->getScalarType()->getPointerElementType(),
 			tableRuntimeDataPointer,
-			{emitLiteralIptr(offsetof(TableRuntimeData, base), moduleContext.iptrType)}),
+			emitLiteralIptr(offsetof(TableRuntimeData, base), moduleContext.iptrType)),
 		moduleContext.iptrType->getPointerTo(),
 		moduleContext.iptrAlignment);
 	auto tableMaxIndex = loadFromUntypedPointer(
 		irBuilder.CreateInBoundsGEP(
+			tableRuntimeDataPointer->getType()->getScalarType()->getPointerElementType(),
 			tableRuntimeDataPointer,
-			{emitLiteralIptr(offsetof(TableRuntimeData, endIndex), moduleContext.iptrType)}),
+			emitLiteralIptr(offsetof(TableRuntimeData, endIndex), moduleContext.iptrType)),
 		moduleContext.iptrType,
 		moduleContext.iptrAlignment);
 
@@ -393,8 +403,12 @@ void EmitFunctionContext::call_indirect(CallIndirectImm imm)
 		irBuilder.CreateICmpULT(elementIndex, tableMaxIndex), elementIndex, tableMaxIndex);
 
 	// Load the funcref referenced by the table.
-	auto elementPointer = irBuilder.CreateInBoundsGEP(tableBasePointer, {clampedElementIndex});
-	llvm::LoadInst* biasedValueLoad = irBuilder.CreateLoad(elementPointer);
+	auto elementPointer = irBuilder.CreateInBoundsGEP(
+		tableBasePointer->getType()->getScalarType()->getPointerElementType(),
+		tableBasePointer,
+		clampedElementIndex);
+	llvm::LoadInst* biasedValueLoad = irBuilder.CreateLoad(
+		elementPointer->getType()->getScalarType()->getPointerElementType(), elementPointer);
 	biasedValueLoad->setAtomic(llvm::AtomicOrdering::Acquire);
 	biasedValueLoad->setAlignment(LLVM_ALIGNMENT(sizeof(Uptr)));
 	auto runtimeFunction = irBuilder.CreateIntToPtr(
@@ -402,6 +416,7 @@ void EmitFunctionContext::call_indirect(CallIndirectImm imm)
 		llvmContext.i8PtrType);
 	auto elementTypeId = loadFromUntypedPointer(
 		irBuilder.CreateInBoundsGEP(
+			runtimeFunction->getType()->getScalarType()->getPointerElementType(),
 			runtimeFunction,
 			emitLiteralIptr(offsetof(Runtime::Function, encodedType), moduleContext.iptrType)),
 		moduleContext.iptrType,
@@ -426,6 +441,7 @@ void EmitFunctionContext::call_indirect(CallIndirectImm imm)
 	// Call the function loaded from the table.
 	auto functionPointer = irBuilder.CreatePointerCast(
 		irBuilder.CreateInBoundsGEP(
+			runtimeFunction->getType()->getScalarType()->getPointerElementType(),
 			runtimeFunction,
 			emitLiteralIptr(offsetof(Runtime::Function, code), moduleContext.iptrType)),
 		asLLVMType(llvmContext, calleeType)->getPointerTo());
