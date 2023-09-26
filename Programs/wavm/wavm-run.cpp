@@ -768,7 +768,14 @@ struct State
 		{
 			return EXIT_FAILURE;
 		}
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
 		const IR::Module& irModule = Runtime::getModuleIR(module);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 		// Initialize the ABI-specific environment.
 		if(!initABIEnvironment(irModule)) { return EXIT_FAILURE; }

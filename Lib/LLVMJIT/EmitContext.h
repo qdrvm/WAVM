@@ -204,8 +204,7 @@ namespace WAVM { namespace LLVMJIT {
 						irBuilder.CreateInBoundsGEP(
 							argsArray->getType()->getScalarType()->getPointerElementType(),
 							argsArray,
-							{emitLiteral(llvmContext,
-										 Uptr(argIndex * sizeof(IR::UntaggedValue)))}));
+							emitLiteral(llvmContext, Uptr(argIndex * sizeof(IR::UntaggedValue)))));
 				}
 
 				resultsArray = irBuilder.CreateAlloca(

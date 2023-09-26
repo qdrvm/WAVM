@@ -515,14 +515,6 @@ function(WAVM_SET_TARGET_COMPILE_OPTIONS TARGET_NAME)
 		target_link_libraries(${TARGET_NAME} PRIVATE "-pthread")
 	endif()
 
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-redundant-move")
-        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-dangling-reference")
-        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-error=extra")
-    else()
-        target_compile_options(${TARGET_NAME} PRIVATE "-Wno-redundant-move")
-    endif()
-
 	# Add the optional flags that the compiler was detected to support.
 	# This needs to happen *AFTER* the above -Wall -Wextra to ensure that those flags don't
 	# re-enable warnings that are being disabled by these flags.
