@@ -161,6 +161,10 @@ static void testSetCopy()
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wself-move"
 #endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
 static void testSetMove()
 {
 	// Add 1000..1999 to a HashSet.
@@ -191,6 +195,9 @@ static void testSetMove()
 }
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
 static void testSetInitializerList()
