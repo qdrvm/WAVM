@@ -796,12 +796,12 @@ size_t wasm_module_num_imports(const wasm_module_t* module)
 }
 void wasm_module_import(const wasm_module_t* module, size_t index, wasm_import_t* out_import)
 {
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"
 #endif
 	const IR::Module& irModule = getModuleIR(module->module);
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 	const KindAndIndex& kindAndIndex = irModule.imports[index];
@@ -857,12 +857,12 @@ size_t wasm_module_num_exports(const wasm_module_t* module)
 }
 void wasm_module_export(const wasm_module_t* module, size_t index, wasm_export_t* out_export)
 {
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"
 #endif
 	const IR::Module& irModule = getModuleIR(module->module);
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 	const Export& export_ = irModule.exports[index];
@@ -1132,12 +1132,12 @@ wasm_instance_t* wasm_instance_new(wasm_store_t* store,
 								   wasm_trap_t** out_trap,
 								   const char* debug_name)
 {
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"
 #endif
 	const IR::Module& irModule = getModuleIR(module->module);
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

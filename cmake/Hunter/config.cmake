@@ -22,5 +22,4 @@ hunter_config(
     VERSION 12.0.1-p4
     CMAKE_ARGS
       LLVM_ENABLE_PROJECTS=ir
-    KEEP_PACKAGE_SOURCES
 )

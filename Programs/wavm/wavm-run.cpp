@@ -768,12 +768,12 @@ struct State
 		{
 			return EXIT_FAILURE;
 		}
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"
 #endif
 		const IR::Module& irModule = Runtime::getModuleIR(module);
-#if defined(__GNUC__) and not defined(__clang__)
+#if defined(__GNUC__) and __GNUC__ > 12 and not defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
