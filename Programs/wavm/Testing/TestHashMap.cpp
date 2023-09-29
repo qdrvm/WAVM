@@ -170,7 +170,7 @@ static void testMapCopy()
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wself-move"
 #endif
-#if defined(__GNUC__)
+#if defined(__GNUC__) and __GNUC__ > 12
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
 #endif
@@ -205,7 +205,7 @@ static void testMapMove()
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
-#if defined(__GNUC__)
+#if defined(__GNUC__) and __GNUC__ > 12
 #pragma GCC diagnostic pop
 #endif
 
